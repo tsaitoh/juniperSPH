@@ -17,4 +17,11 @@ FetchContent_MakeAvailable(googletest)
 add_executable(KernelTest test_kernel.cpp) # First create an initial executable from the test case code.
 target_link_libraries(KernelTest PRIVATE gtest_main) # Link the test module to the gtest framework
 target_link_libraries(KernelTest PRIVATE juniperSRC) # Add the kernel code modules to a `kernel_src` library
-add_test(NAME sph_example_tests COMMAND KernelTest) # Add the test as a new run configuration `KernelTest`
+add_test(NAME Kernel_Tests COMMAND KernelTest) # Add the test as a new run configuration `KernelTest`
+
+# Create a test for the SimData.cpp module:
+add_executable(ReaderTest test_reading.cpp)
+target_link_libraries(ReaderTest PRIVATE gtest_main gmock_main)
+target_link_libraries(ReaderTest PRIVATE juniperSRC)
+file(COPY ./files/test.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
+add_test(NAME Reader_Tests COMMAND ReaderTest)
