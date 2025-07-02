@@ -39,13 +39,13 @@ SimData::SimData(const std::string& filename) {
         int i = 0;
 
         for (const auto& cell : row) {
-            if (data[0][i] == "x") {
+            if (std::ranges::find(posCols, data[0][i]) != std::end(posCols)) {
                 xyzh.push_back(std::stof(cell));
             }
-            if (data[0][i] == "v") {
+            if (std::ranges::find(velCols, data[0][i]) != std::end(velCols)) {
                 vxyzv.push_back(std::stof(cell));
             }
-            if (data[0][i] == "f") {
+            if (std::ranges::find(varCols, data[0][i]) != std::end(varCols)) {
                 fxyz.push_back(std::stof(cell));
             }
 

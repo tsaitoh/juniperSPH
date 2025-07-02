@@ -11,6 +11,10 @@ public:
     std::vector<float> vxyzv;
     std::vector<float> fxyz;
 
+    static inline const std::vector<std::string> posCols{"x", "y", "z", "h"};
+    static inline const std::vector<std::string> velCols{"vx", "vy", "vz"};
+    static inline const std::vector<std::string> varCols{"fx", "fy", "fz"};
+
     SimData(const std::string& filename);
 };
 
