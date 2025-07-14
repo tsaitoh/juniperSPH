@@ -1,6 +1,8 @@
 #include <vector>
 #include <string>
 
+#include "kernel.h"
+
 #ifndef SIMDATA_H
 #define SIMDATA_H
 
@@ -15,7 +17,9 @@ public:
     static inline const std::vector<std::string> velCols{"vx", "vy", "vz"};
     static inline const std::vector<std::string> varCols{"fx", "fy", "fz"};
 
-    SimData(const std::string& filename);
+    explicit SimData(const std::string& filename);
+
+    std::vector<int> getNeighbours(int part, Kernel kernel);
 };
 
 #endif //SIMDATA_H
