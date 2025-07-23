@@ -13,6 +13,9 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# Copy files into test directory
+file(COPY ./files/test.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
+
 # Create a test for the kernel.cpp module:
 add_executable(KernelTest test_kernel.cpp
         test_neighbours.cpp) # First create an initial executable from the test case code.
@@ -24,11 +27,14 @@ add_test(NAME Kernel_Tests COMMAND KernelTest) # Add the test as a new run confi
 add_executable(ReaderTest test_reading.cpp)
 target_link_libraries(ReaderTest PRIVATE gtest_main gmock_main)
 target_link_libraries(ReaderTest PRIVATE juniperSRC)
-file(COPY ./files/test.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
 add_test(NAME Reader_Tests COMMAND ReaderTest)
 
 add_executable(NeighbourTest test_neighbours.cpp)
 target_link_libraries(NeighbourTest PRIVATE gtest_main)
 target_link_libraries(NeighbourTest PRIVATE juniperSRC)
-file(COPY ./files/test.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
 add_test(NAME Neighbour_Tests COMMAND NeighbourTest)
+
+add_executable(DensityTest test_density.cpp)
+target_link_libraries(DensityTest PRIVATE gtest_main)
+target_link_libraries(DensityTest PRIVATE juniperSRC)
+add_test(NAME Density_Tests COMMAND DensityTest)

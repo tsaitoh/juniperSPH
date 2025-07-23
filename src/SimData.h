@@ -9,6 +9,7 @@
 class SimData {
 public:
     double time;
+    float m;
     std::vector<float> xyzh;
     std::vector<float> vxyzv;
     std::vector<float> fxyz;
@@ -18,8 +19,10 @@ public:
     static inline const std::vector<std::string> varCols{"fx", "fy", "fz"};
 
     explicit SimData(const std::string& filename);
+    explicit SimData() : SimData("") {};
 
     std::vector<int> getNeighbours(int part, Kernel kernel);
+    float densityAt(int part, Kernel kernel);
 };
 
 #endif //SIMDATA_H

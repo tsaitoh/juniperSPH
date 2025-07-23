@@ -14,6 +14,12 @@
 
 SimData::SimData(const std::string& filename) {
     time = 0.0;
+    m = 0.01;
+
+    if (filename.empty()) {
+        return;
+    }
+
     std::ifstream file(filename);
 
     if (!file.is_open()) {
@@ -55,7 +61,6 @@ SimData::SimData(const std::string& filename) {
     }
 }
 
-
 std::vector<int> SimData::getNeighbours(int part, Kernel kernel) {
     // Naive strategy for neighbour finding, will replace with kd-tree
     float tarX = xyzh[4 * part], tarY = xyzh[4 * part+1], tarZ = xyzh[4 * part+2], tarH = xyzh[4 * part+3];
@@ -77,4 +82,17 @@ std::vector<int> SimData::getNeighbours(int part, Kernel kernel) {
     return neighbours;
 }
 
+float SimData::densityAt(int part, Kernel kernel) {
+    float thisX = xyzh[4 * part], thisY = xyzh[4 * part+1], thisZ = xyzh[4 * part+2], thisH = xyzh[4 * part+3];
+    std::vector<int> neighbours = getNeighbours(part, kernel);
 
+    float density = 0.0;
+    int x = 0;
+    for (int i : neighbours) {
+        float tarX = xyzh[4 * i], tarY = xyzh[4 * i+1], tarZ = xyzh[4 * i+2], tarH = xyzh[4 * i+3];
+        float dist = std::sqrt((tarX - thisX) * (tarX - thisX) + (tarY - thisY) * (tarY - thisY) + (tarZ - thisZ) * (tarZ - thisZ));
+        density += kernel.valueAt(dist / tarH) * m;
+    }
+
+    return density;
+}
