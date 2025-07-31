@@ -27,3 +27,11 @@ TEST(DensityTest, SimpleDensityTest) {
         ASSERT_FLOAT_EQ(data.densityAt(part, kernel), 0.0222816920329);
     }
 }
+
+
+TEST(DensityTest, PhantomDensityTest) {
+    SimData data = SimData("files/hydro32_00020.csv");
+    Kernel kernel = Kernel();
+
+    data.densityIterate(kernel);
+}

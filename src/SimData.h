@@ -21,6 +21,8 @@ public:
     explicit SimData(const std::string& filename);
     explicit SimData() : SimData("") {};
 
+    float distBetween(int part1, int part2) const;
+    void densityIterate(Kernel kernel);
     std::vector<int> getNeighbours(int part, Kernel kernel);
     float densityAt(int part, Kernel kernel);
 };

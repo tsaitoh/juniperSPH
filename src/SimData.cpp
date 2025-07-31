@@ -63,17 +63,14 @@ SimData::SimData(const std::string& filename) {
 
 std::vector<int> SimData::getNeighbours(int part, Kernel kernel) {
     // Naive strategy for neighbour finding, will replace with kd-tree
-    float tarX = xyzh[4 * part], tarY = xyzh[4 * part+1], tarZ = xyzh[4 * part+2], tarH = xyzh[4 * part+3];
+    float tarH = xyzh[4 * part+3];
     std::vector<int> neighbours;
 
     for (int i = 0; i < std::floor(xyzh.size() / 4); i++) {
         if (i == part) {
             continue;
         }
-
-        float x = xyzh[4 * i], y = xyzh[4 * i + 1], z = xyzh[4 * i + 2];
-
-        float dist = std::sqrt((tarX - x) * (tarX - x) + (tarY - y) * (tarY - y) + (tarZ - z) * (tarZ - z));
+        float dist = distBetween(part, i);
         if (kernel.valueAt(dist / tarH) > 0) {
             neighbours.push_back(i);
         }
@@ -82,17 +79,68 @@ std::vector<int> SimData::getNeighbours(int part, Kernel kernel) {
     return neighbours;
 }
 
+float SimData::distBetween(int part1, int part2) const {
+    float x1 = xyzh[4 * part1], y1 = xyzh[4 * part1 + 1], z1 = xyzh[4 * part1 + 2];
+    float x2 = xyzh[4 * part2], y2 = xyzh[4 * part2 + 1], z2 = xyzh[4 * part2 + 2];
+
+    return std::sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
+}
+
+
 float SimData::densityAt(int part, Kernel kernel) {
     float thisX = xyzh[4 * part], thisY = xyzh[4 * part+1], thisZ = xyzh[4 * part+2], thisH = xyzh[4 * part+3];
     std::vector<int> neighbours = getNeighbours(part, kernel);
 
     float density = 0.0;
-    int x = 0;
     for (int i : neighbours) {
-        float tarX = xyzh[4 * i], tarY = xyzh[4 * i+1], tarZ = xyzh[4 * i+2], tarH = xyzh[4 * i+3];
-        float dist = std::sqrt((tarX - thisX) * (tarX - thisX) + (tarY - thisY) * (tarY - thisY) + (tarZ - thisZ) * (tarZ - thisZ));
+        float dist = distBetween(part, i);
+        float tarH = xyzh[4 * part+3];
         density += kernel.valueAt(dist / tarH) * m;
     }
 
     return density;
 }
+
+
+void SimData::densityIterate(Kernel kernel) {
+    int totalIterationCount = 0;
+    int iterationCount = 0;
+    int maxIterations = 1000;
+
+    for (int i = 0; i < std::floor(xyzh.size() / 4); i++) {
+        float oldH = MAXFLOAT;
+        float newH = xyzh[i * 4 + 3];
+
+        while (std::abs(newH - oldH) / xyzh[i * 4 + 3] > 0.0001) {
+            std::vector<int> neighbours = getNeighbours(i, kernel);
+            float hfact = 1.2;
+            float pressure = m * (hfact / newH) * (hfact / newH) * (hfact / newH);
+            float grad = 3 * (newH / pressure);
+            float omega = 1 - grad * (m * neighbours.size());
+
+            float pressure_sum = 0;
+            for (int neighbour : neighbours) {
+                pressure_sum += m * kernel.valueAt(distBetween(i, neighbour) / newH);
+            }
+
+            oldH = newH;
+            newH = newH - pressure_sum / ((-3 * pressure * omega) / newH);
+            totalIterationCount++;
+            iterationCount++;
+
+            if (iterationCount > 1) {
+                std::cout << "At particle " << i << ", iteration " << iterationCount << std::endl;
+            }
+
+            if (iterationCount > maxIterations) {
+                break;
+            }
+        }
+        iterationCount = 0;
+    }
+
+    std::cout << "Finished with " << totalIterationCount << " iterations on " << xyzh.size() / 4 << " particles." << std::endl;
+    std::cout << "Average of " << totalIterationCount / (xyzh.size() / 4.0) << " iterations per particle." << std::endl;
+}
+
+
