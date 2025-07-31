@@ -11,6 +11,7 @@
 #include <sstream>
 #include <string>
 #include <ranges>
+#include <limits>
 
 SimData::SimData(const std::string& filename) {
     time = 0.0;
@@ -108,7 +109,7 @@ void SimData::densityIterate(Kernel kernel) {
     int maxIterations = 1000;
 
     for (int i = 0; i < std::floor(xyzh.size() / 4); i++) {
-        float oldH = MAXFLOAT;
+        float oldH = std::numeric_limits<float>::max();
         float newH = xyzh[i * 4 + 3];
 
         while (std::abs(newH - oldH) / xyzh[i * 4 + 3] > 0.0001) {
