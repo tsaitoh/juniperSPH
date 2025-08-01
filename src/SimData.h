@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <limits>
 
 #include "kernel.h"
 
@@ -8,6 +9,7 @@
 
 class SimData {
 public:
+    float xmin, xmax, ymin, ymax, zmin, zmax;
     double time;
     float m;
     std::vector<float> xyzh;
@@ -25,6 +27,8 @@ public:
     void densityIterate(Kernel kernel);
     std::vector<int> getNeighbours(int part, Kernel kernel);
     float densityAt(int part, Kernel kernel);
+    void setLimits();
+    void setLimits(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 };
 
 #endif //SIMDATA_H

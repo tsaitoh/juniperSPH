@@ -23,6 +23,8 @@ TEST(DensityTest, SimpleDensityTest) {
         }
     }
 
+    data.setLimits(0, L, 0, L, 0, L);
+
     for (int part = 0; part < parts1d * parts1d * parts1d; part++) {
         ASSERT_FLOAT_EQ(data.densityAt(part, kernel), 0.0222816920329);
     }
@@ -32,6 +34,28 @@ TEST(DensityTest, SimpleDensityTest) {
 TEST(DensityTest, PhantomDensityTest) {
     SimData data = SimData("files/hydro32_00020.csv");
     Kernel kernel = Kernel();
+    data.m = 3.0517578125e-05;
 
     data.densityIterate(kernel);
+}
+
+
+TEST(DensityTest, PeriodicBoundariesTest) {
+    // Note: This test currently depends on the default m=0.01.
+    SimData data = SimData();
+    Kernel kernel = Kernel();
+
+    int parts = 2;
+    float L = 1.0f;
+    float increment = L / (parts - 1);
+
+    for (int x = 0; x < parts; x++) {
+        data.xyzh.push_back(x * increment);
+        data.xyzh.push_back(0);
+        data.xyzh.push_back(0);
+        data.xyzh.push_back(0.25);
+    }
+    data.setLimits();
+
+    ASSERT_NE(data.densityAt(0, kernel), 0);
 }

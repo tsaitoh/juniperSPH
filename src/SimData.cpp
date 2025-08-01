@@ -47,19 +47,22 @@ SimData::SimData(const std::string& filename) {
         int i = 0;
 
         for (const auto& cell : row) {
-            if (std::ranges::find(posCols, data[0][i]) != std::end(posCols)) {
+            std::string column = data[0][i];
+            if (std::ranges::find(posCols, column) != std::end(posCols)) {
                 xyzh.push_back(std::stof(cell));
             }
-            if (std::ranges::find(velCols, data[0][i]) != std::end(velCols)) {
+            if (std::ranges::find(velCols, column) != std::end(velCols)) {
                 vxyzv.push_back(std::stof(cell));
             }
-            if (std::ranges::find(varCols, data[0][i]) != std::end(varCols)) {
+            if (std::ranges::find(varCols, column) != std::end(varCols)) {
                 fxyz.push_back(std::stof(cell));
             }
 
             i++;
         }
     }
+
+    this->setLimits();
 }
 
 std::vector<int> SimData::getNeighbours(int part, Kernel kernel) {
@@ -72,7 +75,7 @@ std::vector<int> SimData::getNeighbours(int part, Kernel kernel) {
             continue;
         }
         float dist = distBetween(part, i);
-        if (kernel.valueAt(dist / tarH) > 0) {
+        if (kernel.valueAt(dist / tarH) > 0 || kernel.valueAt(dist / xyzh[4 * i+3]) > 0) {
             neighbours.push_back(i);
         }
     }
@@ -84,12 +87,25 @@ float SimData::distBetween(int part1, int part2) const {
     float x1 = xyzh[4 * part1], y1 = xyzh[4 * part1 + 1], z1 = xyzh[4 * part1 + 2];
     float x2 = xyzh[4 * part2], y2 = xyzh[4 * part2 + 1], z2 = xyzh[4 * part2 + 2];
 
-    return std::sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
+    float dx = std::abs(x1 - x2);
+    float dy = std::abs(y1 - y2);
+    float dz = std::abs(z1 - z2);
+
+    if (dx > (this->xmax - this->xmin) / 2) {
+        dx = (this->xmax - this->xmin) - dx;
+    }
+    if (dy > (this->ymax - this->ymin) / 2) {
+        dy = (this->ymax - this->ymin) - dy;
+    }
+    if (dz > (this->zmax - this->zmin) / 2) {
+        dz = (this->zmax - this->zmin) - dz;
+    }
+
+    return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 
 float SimData::densityAt(int part, Kernel kernel) {
-    float thisX = xyzh[4 * part], thisY = xyzh[4 * part+1], thisZ = xyzh[4 * part+2], thisH = xyzh[4 * part+3];
     std::vector<int> neighbours = getNeighbours(part, kernel);
 
     float density = 0.0;
@@ -144,4 +160,29 @@ void SimData::densityIterate(Kernel kernel) {
     std::cout << "Average of " << totalIterationCount / (xyzh.size() / 4.0) << " iterations per particle." << std::endl;
 }
 
+void SimData::setLimits() {
+    xmin = xmax = xyzh[0];
+    ymin = ymax = xyzh[1];
+    zmin = zmax = xyzh[2];
+
+    for (int i = 0; i < std::floor(xyzh.size() / 4); i++) {
+        float x = xyzh[4 * i], y = xyzh[4 * i + 1], z = xyzh[4 * i + 2];
+
+        if (xmin > x) { xmin = x; }
+        if (ymin > y) { ymin = y; }
+        if (zmin > z) { zmin = z; }
+        if (xmax < x) { xmax = x; }
+        if (ymax < y) { ymax = y; }
+        if (zmax < z) { zmax = z; }
+    }
+}
+
+void SimData::setLimits(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax) {
+    this->xmin = xmin;
+    this->xmax = xmax;
+    this->ymin = ymin;
+    this->ymax = ymax;
+    this->zmin = zmin;
+    this->zmax = zmax;
+}
 
