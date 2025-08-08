@@ -12,3 +12,13 @@ TEST(KernelTest, KernelValueTest) {
     EXPECT_EQ(kernel.valueAt(2), 0);
 }
 
+TEST(KernelTest, GradientValueTest) {
+    Kernel kernel = Kernel();
+
+    EXPECT_FLOAT_EQ(kernel.gradientAt(0), 0);
+    EXPECT_FLOAT_EQ(kernel.gradientAt(0.5), ((2.25 * 0.5) - 3) * 0.5 / M_PI);
+    EXPECT_FLOAT_EQ(kernel.gradientAt(1), -0.75 / M_PI);
+    EXPECT_FLOAT_EQ(kernel.gradientAt(1.5), -0.75 * (0.5 * 0.5) / M_PI);
+    EXPECT_EQ(kernel.gradientAt(2), 0);
+}
+

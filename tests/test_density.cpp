@@ -1,3 +1,4 @@
+#include <random>
 #include <gtest/gtest.h>
 #include "SimData.h"
 #include "kernel.h"
@@ -30,15 +31,27 @@ TEST(DensityTest, SimpleDensityTest) {
     }
 }
 
-
 TEST(DensityTest, PhantomDensityTest) {
     SimData data = SimData("files/hydro32_00020.csv");
     Kernel kernel = Kernel();
     data.m = 3.0517578125e-05;
 
-    data.densityIterate(kernel);
-}
+    // Even if we randomly perturb the h-values of each particle, we should still return to the same state.
+    std::vector<float> oldxyzh(data.xyzh);
+    std::default_random_engine el(15);
+    std::uniform_real_distribution<float> distribution(0.9, 1.1);
+    for (int i = 0; i < data.getParticleCount(); i++) {
+        data.xyzh[i + 3] += data.xyzh[i + 3] * distribution(el);
+    }
 
+    data.densityIterate(kernel);
+    for (int i = 0; i < data.getParticleCount(); i++) {
+        ASSERT_NEAR(data.xyzh[i + 3], oldxyzh[i + 3], 0.0001);
+        if (i % 100 == 0) {
+            std::cout << "Checking particle: " << i << std::endl;
+        }
+    }
+}
 
 TEST(DensityTest, PeriodicBoundariesTest) {
     // Note: This test currently depends on the default m=0.01.

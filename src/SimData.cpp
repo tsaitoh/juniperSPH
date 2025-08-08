@@ -70,10 +70,7 @@ std::vector<int> SimData::getNeighbours(int part, Kernel kernel) {
     float tarH = xyzh[4 * part+3];
     std::vector<int> neighbours;
 
-    for (int i = 0; i < std::floor(xyzh.size() / 4); i++) {
-        if (i == part) {
-            continue;
-        }
+    for (int i = 0; i < this->getParticleCount(); i++) {
         float dist = distBetween(part, i);
         if (kernel.valueAt(dist / tarH) > 0 || kernel.valueAt(dist / xyzh[4 * i+3]) > 0) {
             neighbours.push_back(i);
@@ -120,44 +117,46 @@ float SimData::densityAt(int part, Kernel kernel) {
 
 
 void SimData::densityIterate(Kernel kernel) {
-    int totalIterationCount = 0;
     int iterationCount = 0;
-    int maxIterations = 1000;
+    int maxIterations = 40;
 
-    for (int i = 0; i < std::floor(xyzh.size() / 4); i++) {
+    for (int i = 0; i < this->getParticleCount(); i++) {
         float oldH = std::numeric_limits<float>::max();
         float newH = xyzh[i * 4 + 3];
 
         while (std::abs(newH - oldH) / xyzh[i * 4 + 3] > 0.0001) {
             std::vector<int> neighbours = getNeighbours(i, kernel);
             float hfact = 1.2;
-            float pressure = m * (hfact / newH) * (hfact / newH) * (hfact / newH);
-            float grad = 3 * (newH / pressure);
-            float omega = 1 - grad * (m * neighbours.size());
+            float density = m * (hfact / newH) * (hfact / newH) * (hfact / newH);
+            float grad = -3 * (newH / density);
+            float omega = 1 - grad * (neighbours.size() * (m * (kernel.gradientAt(newH) / (newH * newH * newH * newH))));
 
-            float pressure_sum = 0;
+            float density_sum = 0;
             for (int neighbour : neighbours) {
-                pressure_sum += m * kernel.valueAt(distBetween(i, neighbour) / newH);
+                density_sum += m * kernel.valueAt(distBetween(i, neighbour) / newH) / (newH * newH * newH);
             }
 
             oldH = newH;
-            newH = newH - pressure_sum / ((-3 * pressure * omega) / newH);
-            totalIterationCount++;
+            newH = newH - (density_sum - density) / ((-3 * density * omega) / newH);
             iterationCount++;
 
-            if (iterationCount > 1) {
-                std::cout << "At particle " << i << ", iteration " << iterationCount << std::endl;
+            if (newH > 1.4 * oldH) {
+                newH = 1.4 * oldH;
+            }
+            else if (newH < 0.7 * oldH) {
+                newH = 0.7 * oldH;
             }
 
             if (iterationCount > maxIterations) {
                 break;
             }
         }
+        if (i % 1000 == 0) {
+            std::cout << "Iterating over particle: " << i << std::endl;
+        }
+        xyzh[i * 4 + 3] = newH;
         iterationCount = 0;
     }
-
-    std::cout << "Finished with " << totalIterationCount << " iterations on " << xyzh.size() / 4 << " particles." << std::endl;
-    std::cout << "Average of " << totalIterationCount / (xyzh.size() / 4.0) << " iterations per particle." << std::endl;
 }
 
 void SimData::setLimits() {
@@ -165,7 +164,7 @@ void SimData::setLimits() {
     ymin = ymax = xyzh[1];
     zmin = zmax = xyzh[2];
 
-    for (int i = 0; i < std::floor(xyzh.size() / 4); i++) {
+    for (int i = 0; i < this->getParticleCount(); i++) {
         float x = xyzh[4 * i], y = xyzh[4 * i + 1], z = xyzh[4 * i + 2];
 
         if (xmin > x) { xmin = x; }
@@ -184,5 +183,9 @@ void SimData::setLimits(float xmin, float xmax, float ymin, float ymax, float zm
     this->ymax = ymax;
     this->zmin = zmin;
     this->zmax = zmax;
+}
+
+int SimData::getParticleCount() const {
+    return std::floor(xyzh.size() / 4);
 }
 
