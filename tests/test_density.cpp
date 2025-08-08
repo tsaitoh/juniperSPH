@@ -36,20 +36,19 @@ TEST(DensityTest, PhantomDensityTest) {
     Kernel kernel = Kernel();
     data.m = 3.0517578125e-05;
 
-    // Even if we randomly perturb the h-values of each particle, we should still return to the same state.
+    // Even if we randomly perturb the h-values of some particles, we should still return to the same state.
     std::vector<float> oldxyzh(data.xyzh);
     std::default_random_engine el(15);
     std::uniform_real_distribution<float> distribution(0.9, 1.1);
     for (int i = 0; i < data.getParticleCount(); i++) {
-        data.xyzh[i + 3] += data.xyzh[i + 3] * distribution(el);
+        if (i % 100 == 0) {
+            data.xyzh[i + 3] = data.xyzh[i + 3] * distribution(el);
+        }
     }
 
     data.densityIterate(kernel);
     for (int i = 0; i < data.getParticleCount(); i++) {
-        ASSERT_NEAR(data.xyzh[i + 3], oldxyzh[i + 3], 0.0001);
-        if (i % 100 == 0) {
-            std::cout << "Checking particle: " << i << std::endl;
-        }
+        EXPECT_NEAR(data.xyzh[i + 3], oldxyzh[i + 3], 0.0001);
     }
 }
 

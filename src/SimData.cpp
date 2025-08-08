@@ -124,7 +124,7 @@ void SimData::densityIterate(Kernel kernel) {
         float oldH = std::numeric_limits<float>::max();
         float newH = xyzh[i * 4 + 3];
 
-        while (std::abs(newH - oldH) / xyzh[i * 4 + 3] > 0.0001) {
+        while (std::abs(newH - oldH) / xyzh[i * 4 + 3] > 0.00001) {
             std::vector<int> neighbours = getNeighbours(i, kernel);
             float hfact = 1.2;
             float density = m * (hfact / newH) * (hfact / newH) * (hfact / newH);
@@ -150,9 +150,6 @@ void SimData::densityIterate(Kernel kernel) {
             if (iterationCount > maxIterations) {
                 break;
             }
-        }
-        if (i % 1000 == 0) {
-            std::cout << "Iterating over particle: " << i << std::endl;
         }
         xyzh[i * 4 + 3] = newH;
         iterationCount = 0;
