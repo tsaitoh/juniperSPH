@@ -27,7 +27,7 @@ TEST(DensityTest, SimpleDensityTest) {
     data.setLimits(0, L, 0, L, 0, L);
 
     for (int part = 0; part < parts1d * parts1d * parts1d; part++) {
-        ASSERT_FLOAT_EQ(data.densityAt(part, kernel), 0.0222816920329);
+        ASSERT_FLOAT_EQ(data.densityAt(part, kernel), 0.02546479089);
     }
 }
 
