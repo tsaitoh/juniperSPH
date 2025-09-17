@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.16.3)
 project(sph_tests)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -16,6 +16,7 @@ FetchContent_MakeAvailable(googletest)
 # Copy files into test directory
 file(COPY ./files/test.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
 file(COPY ./files/hydro32_00020.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
+file(COPY ./files/kd_test.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
 
 # Create a test for the kernel.cpp module:
 add_executable(KernelTest test_kernel.cpp

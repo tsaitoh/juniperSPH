@@ -1,16 +1,10 @@
-#include "kernel.h"
-#include <iostream>
 #include <string>
 
-#include "SimData.h"
+#include "Simulation.h"
 
 int main()
 {
-    SimData data = SimData(".//notebooks//ot_00003.csv");
-    Kernel kernel = Kernel();
-
-    std::cout << data.densityAt(0, kernel) << std::endl;
-    std::cout << data.densityAt(1, kernel) << std::endl;
+    Simulation data = Simulation(".//tests//files//hydro32_00020.csv");
 
     return 0;
 }

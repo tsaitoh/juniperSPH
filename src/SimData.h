@@ -1,35 +1,30 @@
-#include <vector>
-#include <string>
-#include <limits>
-
-#include "kernel.h"
+//
+// Created by Andrew on 2025-09-16.
+//
 
 #ifndef SIMDATA_H
 #define SIMDATA_H
+#include <string>
+#include <vector>
+
 
 class SimData {
 public:
-    float xmin, xmax, ymin, ymax, zmin, zmax;
+    explicit SimData(const std::string& filename);
+    explicit SimData() : SimData("") {};
+
+    static inline const std::vector<std::string> posCols{"x", "y", "z", "h"};
+    static inline const std::vector<std::string> velCols{"vx", "vy", "vz"};
+    static inline const std::vector<std::string> varCols{"fx", "fy", "fz"};
+
     double time;
     float m;
     std::vector<float> xyzh;
     std::vector<float> vxyzv;
     std::vector<float> fxyz;
 
-    static inline const std::vector<std::string> posCols{"x", "y", "z", "h"};
-    static inline const std::vector<std::string> velCols{"vx", "vy", "vz"};
-    static inline const std::vector<std::string> varCols{"fx", "fy", "fz"};
-
-    explicit SimData(const std::string& filename);
-    explicit SimData() : SimData("") {};
-
-    float distBetween(int part1, int part2) const;
-    void densityIterate(Kernel kernel);
-    std::vector<int> getNeighbours(int part, Kernel kernel);
-    float densityAt(int part, Kernel kernel);
-    void setLimits();
-    void setLimits(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
     int getParticleCount() const;
 };
+
 
 #endif //SIMDATA_H

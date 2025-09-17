@@ -1,11 +1,12 @@
 #include <random>
 #include <gtest/gtest.h>
-#include "SimData.h"
+#include "Simulation.h"
 #include "kernel.h"
 
 TEST(DensityTest, SimpleDensityTest) {
     // Note: This test currently depends on the default m=0.01.
-    SimData data = SimData();
+    Simulation sim = Simulation();
+    SimData& data = sim.getSimData();
     Kernel kernel = Kernel();
 
     int parts1d = 2;
@@ -24,16 +25,18 @@ TEST(DensityTest, SimpleDensityTest) {
         }
     }
 
-    data.setLimits(0, L, 0, L, 0, L);
+    sim.setLimits(0, L, 0, L, 0, L);
 
     for (int part = 0; part < parts1d * parts1d * parts1d; part++) {
-        ASSERT_FLOAT_EQ(data.densityAt(part, kernel), 0.02546479089);
+        ASSERT_FLOAT_EQ(sim.densityAt(part, kernel), 0.02546479089);
     }
 }
 
 TEST(DensityTest, PhantomDensityTest) {
-    SimData data = SimData("files/hydro32_00020.csv");
+    Simulation sim = Simulation("files/hydro32_00020.csv");
+    SimData& data = sim.getSimData();
     Kernel kernel = Kernel();
+
     data.m = 3.0517578125e-05;
 
     // Even if we randomly perturb the h-values of some particles, we should still return to the same state.
@@ -46,7 +49,7 @@ TEST(DensityTest, PhantomDensityTest) {
         }
     }
 
-    data.densityIterate(kernel);
+    sim.densityIterate(kernel);
     for (int i = 0; i < data.getParticleCount(); i++) {
         EXPECT_NEAR(data.xyzh[i + 3], oldxyzh[i + 3], 0.0001);
     }
@@ -54,7 +57,8 @@ TEST(DensityTest, PhantomDensityTest) {
 
 TEST(DensityTest, PeriodicBoundariesTest) {
     // Note: This test currently depends on the default m=0.01.
-    SimData data = SimData();
+    Simulation sim = Simulation();
+    SimData& data = sim.getSimData();
     Kernel kernel = Kernel();
 
     int parts = 2;
@@ -67,7 +71,7 @@ TEST(DensityTest, PeriodicBoundariesTest) {
         data.xyzh.push_back(0);
         data.xyzh.push_back(0.25);
     }
-    data.setLimits();
+    sim.setLimits(0, 1, 0, 0, 0, 0);
 
-    ASSERT_NE(data.densityAt(0, kernel), 0);
+    ASSERT_NE(sim.densityAt(0, kernel), kernel.valueAt(0));
 }

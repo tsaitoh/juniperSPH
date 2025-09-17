@@ -1,9 +1,15 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.16.3)
 project(juniperSRC)
 
 set(CMAKE_CXX_STANDARD 20)
 
 add_library(juniperSRC STATIC kernel.cpp
+        Simulation.cpp
+        Simulation.h
+        ParticleSet.cpp
+        ParticleSet.h
+        TreeNode.cpp
+        TreeNode.h
         SimData.cpp
         SimData.h
 )
