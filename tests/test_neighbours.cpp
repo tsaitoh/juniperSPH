@@ -31,6 +31,7 @@ void assertAtDepth(TreeNode* node, int depth, int partCountAtDepth) {
 
 TEST(NeighboursTest, TreeBuildTest) {
     Simulation sim = Simulation(".//files//kd_test.csv");
+    sim.buildTree();
 
     assertAtDepth(&sim.getBaseNode(), 6, 5);
 }

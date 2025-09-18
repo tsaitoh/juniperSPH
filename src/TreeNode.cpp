@@ -26,6 +26,9 @@ int TreeNode::getParticleCount() {
     return this->contents.getNumberOfParticles();
 }
 
+std::vector<int> TreeNode::getParticleIndices() {
+    return this->contents.getIndices();
+}
 
 void TreeNode::splitLeaf() {
     if (!this->isLeaf()) {

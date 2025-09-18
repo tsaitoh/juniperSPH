@@ -7,22 +7,24 @@
 
 #include "ParticleSet.h"
 
-ParticleSet::ParticleSet(SimData &data, std::vector<int> indices) : sourceData(data) {
+ParticleSet::ParticleSet(SimData &data, std::vector<int> indices) {
+    this->sourceData = &data;
     this->indices = indices;
 }
 
-ParticleSet::ParticleSet(SimData &data) : sourceData(data) {
+ParticleSet::ParticleSet(SimData &data) {
     std::vector<int> indices(data.getParticleCount());
     std::iota(indices.begin(), indices.end(), 0);
+    this->sourceData = &data;
     this->indices = indices;
 }
 
 Point3f ParticleSet::getCentreOfMass() {
     Point3f centreOfMass(0, 0, 0);
     for (int i : this->indices) {
-        centreOfMass.x += this->sourceData.xyzh[4 * i];
-        centreOfMass.y += this->sourceData.xyzh[4 * i + 1];
-        centreOfMass.z += this->sourceData.xyzh[4 * i + 2];
+        centreOfMass.x += this->sourceData->xyzh[4 * i];
+        centreOfMass.y += this->sourceData->xyzh[4 * i + 1];
+        centreOfMass.z += this->sourceData->xyzh[4 * i + 2];
     }
 
     centreOfMass.x /= this->getNumberOfParticles();
@@ -35,12 +37,12 @@ Point3f ParticleSet::getCentreOfMass() {
 Box3f ParticleSet::getBoundingBox() {
     int fi = this->indices[0];
 
-    Box3f box(sourceData.xyzh[4 * fi], sourceData.xyzh[4 * fi + 1], sourceData.xyzh[4 * fi + 2],
-             sourceData.xyzh[4 * fi], sourceData.xyzh[4 * fi + 1], sourceData.xyzh[4 * fi + 2]);
+    Box3f box(sourceData->xyzh[4 * fi], sourceData->xyzh[4 * fi + 1], sourceData->xyzh[4 * fi + 2],
+             sourceData->xyzh[4 * fi], sourceData->xyzh[4 * fi + 1], sourceData->xyzh[4 * fi + 2]);
     for (int i : this->indices) {
-        float x = this->sourceData.xyzh[4 * i];
-        float y = this->sourceData.xyzh[4 * i + 1];
-        float z = this->sourceData.xyzh[4 * i + 2];
+        float x = this->sourceData->xyzh[4 * i];
+        float y = this->sourceData->xyzh[4 * i + 1];
+        float z = this->sourceData->xyzh[4 * i + 2];
 
         if (x < box.x1) box.x1 = x;
         if (y < box.y1) box.y1 = y;
@@ -58,9 +60,9 @@ float ParticleSet::getBoundingRadius() {
     float boundingRadius = 0;
 
     for (int i : this->indices) {
-        float x = this->sourceData.xyzh[4 * i];
-        float y = this->sourceData.xyzh[4 * i + 1];
-        float z = this->sourceData.xyzh[4 * i + 1];
+        float x = this->sourceData->xyzh[4 * i];
+        float y = this->sourceData->xyzh[4 * i + 1];
+        float z = this->sourceData->xyzh[4 * i + 2];
         float centreDist = std::sqrt(((centre.x - x) * (centre.x - x) +
                             (centre.y - y) * (centre.y - y) +
                             (centre.z - z) * (centre.z - z)));
@@ -75,8 +77,8 @@ float ParticleSet::getMaxSmoothingLength() {
     float maxSmoothingLength = 0;
 
     for (int i: this->indices) {
-        if (this->sourceData.xyzh[4 * i + 3] > maxSmoothingLength) {
-            maxSmoothingLength = this->sourceData.xyzh[4 * i + 3];
+        if (this->sourceData->xyzh[4 * i + 3] > maxSmoothingLength) {
+            maxSmoothingLength = this->sourceData->xyzh[4 * i + 3];
         }
     }
 
@@ -92,6 +94,6 @@ std::vector<int> ParticleSet::getIndices() {
 }
 
 SimData& ParticleSet::getSourceData() {
-    return this->sourceData;
+    return *this->sourceData;
 }
 

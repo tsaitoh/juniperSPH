@@ -15,7 +15,8 @@ class Simulation {
     ParticleSet globalSet;
     TreeNode baseNode;
 
-    void buildTree();
+    float distBetween(float x1, float x2, float y1, float y2, float z1, float z2) const;
+    float findDensityForParticle(int particle, TreeNode& node, Kernel kernel);
 
 public:
     explicit Simulation(const std::string& filename);
@@ -24,8 +25,10 @@ public:
     float xmin, xmax, ymin, ymax, zmin, zmax;
 
     float distBetween(int part1, int part2) const;
+    float distBetweenNodes(TreeNode& node1, TreeNode& node2) const;
     void densityIterate(Kernel kernel);
     std::vector<int> getNeighbours(int part, Kernel kernel);
+    std::vector<int> getNeighboursByTree(int target, TreeNode& node, Kernel kernel);
     float densityAt(int part, Kernel kernel);
     void setLimits();
     void setLimits(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
@@ -33,6 +36,7 @@ public:
 
     SimData& getSimData();
     TreeNode& getBaseNode();
+    void buildTree();
 };
 
 #endif //SIMULATION_H

@@ -11,11 +11,6 @@
 
 class TreeNode {
     bool leaf = true;
-    float x;
-    float y;
-    float z;
-    float size;
-    float hmax;
     std::shared_ptr<TreeNode> leftChild;
     std::shared_ptr<TreeNode> rightChild;
     TreeNode* parent;
@@ -32,12 +27,19 @@ public:
         this->parent = parent;
     }
 
+    float x;
+    float y;
+    float z;
+    float size;
+    float hmax;
+
     TreeNode* getParent();
     std::shared_ptr<TreeNode> getLeftChild();
     std::shared_ptr<TreeNode> getRightChild();
     bool isLeaf();
     void splitLeaf();
     int getParticleCount();
+    std::vector<int> getParticleIndices();
 };
 
 

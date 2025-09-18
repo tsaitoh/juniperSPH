@@ -17,7 +17,7 @@ struct Box3f {
 };
 
 class ParticleSet {
-    SimData& sourceData;
+    SimData* sourceData;
     std::vector<int> indices;
 
 public:
