@@ -24,6 +24,7 @@ Simulation::Simulation(const std::string& filename) : simData(filename), globalS
 }
 
 void Simulation::buildTree() {
+    leaves.clear();
     TreeNode newNode(nullptr, this->globalSet);
     baseNode = newNode;
 
@@ -37,6 +38,8 @@ void Simulation::buildTree() {
             node->splitLeaf();
             nodeStack.push(node->getLeftChild().get());
             nodeStack.push(node->getRightChild().get());
+        } else {
+            leaves.push_back(node);
         }
     }
 }
@@ -174,23 +177,13 @@ float Simulation::findDensityForParticle(int particle, TreeNode& node, Kernel ke
 void Simulation::densityIterate(Kernel kernel) {
     buildTree();
     std::vector<int> neighbours;
-    std::stack<TreeNode*> nodeStack;
-    nodeStack.push(&this->baseNode);
 
-    while (!nodeStack.empty()) {
-        TreeNode* node = nodeStack.top();
-        nodeStack.pop();
-        if (!node->isLeaf()) {
-            nodeStack.push(node->getLeftChild().get());
-            nodeStack.push(node->getRightChild().get());
-            continue;
-        }
-        for (int i : node->getParticleIndices()) {
-            simData.xyzh[i * 4 + 3] = findDensityForParticle(i, *node, kernel);
+    #pragma omp parallel for
+    for (TreeNode* leaf : leaves) {
+        for (const int i : leaf->getParticleIndices()) {
+            simData.xyzh[i * 4 + 3] = findDensityForParticle(i, *leaf, kernel);
         }
     }
-
-
 }
 
 void Simulation::setLimits() {

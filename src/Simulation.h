@@ -14,6 +14,7 @@ class Simulation {
     SimData simData;
     ParticleSet globalSet;
     TreeNode baseNode;
+    std::vector<TreeNode*> leaves;
 
     float distBetween(float x1, float x2, float y1, float y2, float z1, float z2) const;
     float findDensityForParticle(int particle, TreeNode& node, Kernel kernel);
