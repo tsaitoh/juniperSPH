@@ -13,7 +13,7 @@
 #include <stack>
 
 constexpr int NODE_PARTICLE_MIN = 10;
-constexpr int MAX_DENSITY_ITERATIONS = 40;
+constexpr int MAX_DENSITY_ITERATIONS = 400;
 
 Simulation::Simulation(const std::string& filename) : simData(filename), globalSet(simData), baseNode(nullptr, globalSet)  {
     // Do not set limits if data is not supplied, like in unit tests.

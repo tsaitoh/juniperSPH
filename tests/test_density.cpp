@@ -44,14 +44,14 @@ TEST(DensityTest, PhantomDensityTest) {
     std::default_random_engine el(15);
     std::uniform_real_distribution<float> distribution(0.9, 1.1);
     for (int i = 0; i < data.getParticleCount(); i++) {
-        if (i % 100 == 0) {
-            data.xyzh[i + 3] = data.xyzh[i + 3] * distribution(el);
+        if (i % 4 == 0) {
+            data.xyzh[4 * i + 3] = data.xyzh[4 * i + 3] * distribution(el);
         }
     }
 
     sim.densityIterate(kernel);
     for (int i = 0; i < data.getParticleCount(); i++) {
-        EXPECT_NEAR(data.xyzh[i + 3], oldxyzh[i + 3], 0.0001);
+        EXPECT_NEAR(data.xyzh[4 * i + 3], oldxyzh[4 * i + 3], 0.0001);
     }
 }
 
