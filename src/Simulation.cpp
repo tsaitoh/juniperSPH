@@ -3,9 +3,11 @@
 //
 
 #include "Simulation.h"
+#include "toml.hpp"
 
 #include <cmath>
 #include <filesystem>
+#include <iostream>
 #include <string>
 #include <ranges>
 #include <limits>
@@ -20,6 +22,19 @@ Simulation::Simulation(const std::string& filename) : simData(filename), globalS
         return;
     }
     this->setLimits();
+}
+
+void Simulation::useConfig(const std::string& filename) {
+    toml::table tbl;
+    try
+    {
+        tbl = toml::parse_file(filename);
+        this->simData.m = tbl["simconfig"]["mass"].value<float>().value();
+    }
+    catch (const toml::parse_error& err)
+    {
+        std::cerr << "Parsing failed:\n" << err << "\n";
+    }
 }
 
 void Simulation::buildTree() {

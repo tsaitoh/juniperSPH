@@ -26,6 +26,8 @@ public:
 
     float xmin, xmax, ymin, ymax, zmin, zmax;
 
+    void useConfig(const std::string& filename);
+
     float distBetween(int part1, int part2) const;
     float distBetweenNodes(TreeNode& node1, TreeNode& node2) const;
     void densityIterate();

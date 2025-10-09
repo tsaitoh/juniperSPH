@@ -32,12 +32,9 @@ TEST(DensityTest, SimpleDensityTest) {
 }
 
 TEST(DensityTest, PhantomDensityTest) {
-    Simulation sim = Simulation("files/hydro64.csv");
+    Simulation sim = Simulation("files/hydro32_00020.csv");
     SimData& data = sim.getSimData();
-
-    //data.m = 3.814697265625e-06;
-    // Mass value for this dataset, should be encoded in a configuration file instead.
-    data.m = 3.0517578125e-05;
+    sim.useConfig("files/hydro32.toml");
 
     // Even if we randomly perturb the h-values of some particles, we should still return to the same state.
     std::vector<float> oldxyzh(data.xyzh);
