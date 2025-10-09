@@ -6,7 +6,6 @@
 
 #include <cmath>
 #include <filesystem>
-#include <iostream>
 #include <string>
 #include <ranges>
 #include <limits>
@@ -44,7 +43,7 @@ void Simulation::buildTree() {
     }
 }
 
-std::vector<int> Simulation::getNeighboursByTree(int target, TreeNode& targetNode, Kernel kernel) {
+std::vector<int> Simulation::getNeighboursByTree(int target, TreeNode& targetNode) {
     std::vector<int> neighbours;
     std::stack<TreeNode*> nodeStack;
     nodeStack.push(&this->baseNode);
@@ -61,8 +60,7 @@ std::vector<int> Simulation::getNeighboursByTree(int target, TreeNode& targetNod
                 for (int candidate : nextNode->getParticleIndices()) {
                     float dist = distBetween(target, candidate);
                     float targetH = this->getSimData().xyzh[target * 4 + 3];
-                    float candidateH = this->getSimData().xyzh[candidate * 4 + 3];
-                    if (kernel.valueAt(dist / targetH) > 0 || kernel.valueAt(dist / candidateH) > 0) {
+                    if (dist <= targetH * kernel.getRadius()) {
                         neighbours.push_back(candidate);
                     }
                 }
@@ -76,14 +74,14 @@ std::vector<int> Simulation::getNeighboursByTree(int target, TreeNode& targetNod
     return neighbours;
 }
 
-std::vector<int> Simulation::getNeighbours(int part, Kernel kernel) {
+std::vector<int> Simulation::getNeighbours(int part) {
     // Naive strategy for neighbour finding, will replace with kd-tree
     float tarH = simData.xyzh[4 * part+3];
     std::vector<int> neighbours;
 
     for (int i = 0; i < this->getParticleCount(); i++) {
         float dist = distBetween(part, i);
-        if (kernel.valueAt(dist / tarH) > 0 || kernel.valueAt(dist / simData.xyzh[4 * i+3]) > 0) {
+        if (kernel.valueAt(dist / tarH) > 0) {
             neighbours.push_back(i);
         }
     }
@@ -124,8 +122,8 @@ float Simulation::distBetweenNodes(TreeNode& node1, TreeNode& node2) const {
     return distBetween(x1, x2, y1, y2, z1, z2);
 }
 
-float Simulation::densityAt(int part, Kernel kernel) {
-    std::vector<int> neighbours = getNeighbours(part, kernel);
+float Simulation::densityAt(int part) {
+    std::vector<int> neighbours = getNeighbours(part);
 
     float density = 0.0;
     for (int i : neighbours) {
@@ -137,23 +135,25 @@ float Simulation::densityAt(int part, Kernel kernel) {
     return density;
 }
 
-float Simulation::findDensityForParticle(int particle, TreeNode& node, Kernel kernel) {
+float Simulation::findDensityForParticle(int particle, TreeNode& node) {
     float oldH = std::numeric_limits<float>::max();
     float newH = simData.xyzh[particle * 4 + 3];
     int iterationCount = 0;
 
-    while (std::abs(newH - oldH) / simData.xyzh[particle * 4 + 3] > 0.00001) {
-        std::vector<int> neighbours = getNeighboursByTree(particle, node, kernel);
+    while (std::abs(newH - oldH) / simData.xyzh[particle * 4 + 3] > 10e-4) {
+        std::vector<int> neighbours = getNeighboursByTree(particle, node);
 
         float hfact = 1.2;
         float density = simData.m * (hfact / newH) * (hfact / newH) * (hfact / newH);
         float grad = -3 * (newH / density);
-        float omega = 1 - grad * (neighbours.size() * (simData.m * (kernel.gradientAt(newH) / (newH * newH * newH * newH))));
 
         float density_sum = 0;
+        float omega = 0;
         for (int neighbour : neighbours) {
             density_sum += simData.m * kernel.valueAt(distBetween(particle, neighbour) / newH) / (newH * newH * newH);
+            omega += simData.m * kernel.dWdhAt(distBetween(particle, neighbour) / newH);
         }
+        omega = 1 - grad * omega / (newH * newH * newH * newH);
 
         oldH = newH;
         newH = newH - (density_sum - density) / ((-3 * density * omega) / newH);
@@ -174,14 +174,16 @@ float Simulation::findDensityForParticle(int particle, TreeNode& node, Kernel ke
 
 }
 
-void Simulation::densityIterate(Kernel kernel) {
+void Simulation::densityIterate() {
     buildTree();
     std::vector<int> neighbours;
 
-    #pragma omp parallel for
-    for (TreeNode* leaf : leaves) {
-        for (const int i : leaf->getParticleIndices()) {
-            simData.xyzh[i * 4 + 3] = findDensityForParticle(i, *leaf, kernel);
+    #pragma omp parallel for if(leaves.size() > 1)
+    for (std::size_t leafIdx = 0; leafIdx < leaves.size(); leafIdx++) {
+        TreeNode* leaf = leaves[leafIdx];
+        auto indices = leaf->getParticleIndices();
+        for (int i: indices) {
+            simData.xyzh[i * 4 + 3] = findDensityForParticle(i, *leaf);
         }
     }
 }
@@ -222,4 +224,8 @@ SimData& Simulation::getSimData() {
 
 TreeNode& Simulation::getBaseNode() {
     return this->baseNode;
+}
+
+Kernel& Simulation::getKernel() {
+    return this->kernel;
 }

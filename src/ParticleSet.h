@@ -25,7 +25,7 @@ public:
     Box3f getBoundingBox();
     float getBoundingRadius();
     float getMaxSmoothingLength();
-    float getNumberOfParticles();
+    std::size_t getNumberOfParticles();
     std::vector<int> getIndices();
     SimData& getSourceData();
     ParticleSet(SimData& data, std::vector<int> indices);

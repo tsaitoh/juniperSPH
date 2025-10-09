@@ -85,7 +85,7 @@ float ParticleSet::getMaxSmoothingLength() {
     return maxSmoothingLength;
 }
 
-float ParticleSet::getNumberOfParticles() {
+std::size_t ParticleSet::getNumberOfParticles() {
     return this->indices.size();
 }
 

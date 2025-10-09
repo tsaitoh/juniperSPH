@@ -7,7 +7,6 @@ TEST(DensityTest, SimpleDensityTest) {
     // Note: This test currently depends on the default m=0.01.
     Simulation sim = Simulation();
     SimData& data = sim.getSimData();
-    Kernel kernel = Kernel();
 
     int parts1d = 2;
     float L = 1.0f;
@@ -28,15 +27,16 @@ TEST(DensityTest, SimpleDensityTest) {
     sim.setLimits(0, L, 0, L, 0, L);
 
     for (int part = 0; part < parts1d * parts1d * parts1d; part++) {
-        ASSERT_FLOAT_EQ(sim.densityAt(part, kernel), 0.02546479089);
+        ASSERT_FLOAT_EQ(sim.densityAt(part), 0.02546479089);
     }
 }
 
 TEST(DensityTest, PhantomDensityTest) {
-    Simulation sim = Simulation("files/hydro32_00020.csv");
+    Simulation sim = Simulation("files/hydro64.csv");
     SimData& data = sim.getSimData();
-    Kernel kernel = Kernel();
 
+    //data.m = 3.814697265625e-06;
+    // Mass value for this dataset, should be encoded in a configuration file instead.
     data.m = 3.0517578125e-05;
 
     // Even if we randomly perturb the h-values of some particles, we should still return to the same state.
@@ -44,14 +44,12 @@ TEST(DensityTest, PhantomDensityTest) {
     std::default_random_engine el(15);
     std::uniform_real_distribution<float> distribution(0.9, 1.1);
     for (int i = 0; i < data.getParticleCount(); i++) {
-        if (i % 4 == 0) {
-            data.xyzh[4 * i + 3] = data.xyzh[4 * i + 3] * distribution(el);
-        }
+        data.xyzh[4 * i + 3] = data.xyzh[4 * i + 3] * distribution(el);
     }
 
-    sim.densityIterate(kernel);
+    sim.densityIterate();
     for (int i = 0; i < data.getParticleCount(); i++) {
-        EXPECT_NEAR(data.xyzh[4 * i + 3], oldxyzh[4 * i + 3], 0.0001);
+        EXPECT_NEAR(data.xyzh[4 * i + 3], oldxyzh[4 * i + 3], 10e-4);
     }
 }
 
@@ -59,7 +57,6 @@ TEST(DensityTest, PeriodicBoundariesTest) {
     // Note: This test currently depends on the default m=0.01.
     Simulation sim = Simulation();
     SimData& data = sim.getSimData();
-    Kernel kernel = Kernel();
 
     int parts = 2;
     float L = 1.0f;
@@ -73,5 +70,5 @@ TEST(DensityTest, PeriodicBoundariesTest) {
     }
     sim.setLimits(0, 1, 0, 0, 0, 0);
 
-    ASSERT_NE(sim.densityAt(0, kernel), kernel.valueAt(0));
+    ASSERT_NE(sim.densityAt(0), sim.getKernel().valueAt(0));
 }

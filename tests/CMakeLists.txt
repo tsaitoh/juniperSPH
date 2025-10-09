@@ -19,8 +19,7 @@ file(COPY ./files/hydro32_00020.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/file
 file(COPY ./files/kd_test.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/files)
 
 # Create a test for the kernel.cpp module:
-add_executable(KernelTest test_kernel.cpp
-        test_neighbours.cpp) # First create an initial executable from the test case code.
+add_executable(KernelTest test_kernel.cpp) # First create an initial executable from the test case code.
 target_link_libraries(KernelTest PRIVATE gtest_main) # Link the test module to the gtest framework
 target_link_libraries(KernelTest PRIVATE juniperSRC) # Add the kernel code modules to a `kernel_src` library
 add_test(NAME Kernel_Tests COMMAND KernelTest) # Add the test as a new run configuration `KernelTest`

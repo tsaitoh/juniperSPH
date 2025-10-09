@@ -14,10 +14,11 @@ class Simulation {
     SimData simData;
     ParticleSet globalSet;
     TreeNode baseNode;
+    Kernel kernel;
     std::vector<TreeNode*> leaves;
 
     float distBetween(float x1, float x2, float y1, float y2, float z1, float z2) const;
-    float findDensityForParticle(int particle, TreeNode& node, Kernel kernel);
+    float findDensityForParticle(int particle, TreeNode& node);
 
 public:
     explicit Simulation(const std::string& filename);
@@ -27,10 +28,10 @@ public:
 
     float distBetween(int part1, int part2) const;
     float distBetweenNodes(TreeNode& node1, TreeNode& node2) const;
-    void densityIterate(Kernel kernel);
-    std::vector<int> getNeighbours(int part, Kernel kernel);
-    std::vector<int> getNeighboursByTree(int target, TreeNode& node, Kernel kernel);
-    float densityAt(int part, Kernel kernel);
+    void densityIterate();
+    std::vector<int> getNeighbours(int part);
+    std::vector<int> getNeighboursByTree(int target, TreeNode& node);
+    float densityAt(int part);
     void setLimits();
     void setLimits(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
     int getParticleCount() const;
@@ -38,6 +39,7 @@ public:
     SimData& getSimData();
     TreeNode& getBaseNode();
     void buildTree();
+    Kernel& getKernel();
 };
 
 #endif //SIMULATION_H
