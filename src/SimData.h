@@ -24,6 +24,8 @@ public:
     std::vector<float> fxyz;
 
     int getParticleCount() const;
+
+    void toCSV(const std::string& filename);
 };
 
 

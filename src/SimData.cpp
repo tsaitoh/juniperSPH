@@ -60,6 +60,28 @@ SimData::SimData(const std::string& filename) {
             i++;
         }
     }
+
+    file.close();
+}
+
+void SimData::toCSV(const std::string &filename) {
+    std::ofstream file(filename);
+
+    if (!file.is_open()) {
+        std::cout << std::filesystem::current_path().string() << std::endl;
+        std::cerr << "Error writing to file " << filename << std::endl;
+    }
+
+    file << "x,y,z,h,vx,vy,vz,fx,fy,fz" << std::endl;
+
+    for (int i = 0; i < getParticleCount(); i++) {
+        file << xyzh[4*i] << "," << xyzh[4*i+1] << "," << xyzh[4*i+2] << "," << xyzh[4*i+3] << ",";
+        file << vxyzv[3*i] << "," << vxyzv[3*i+1] << "," << vxyzv[3*i+2] << ",";
+        file << fxyz[3*i] << "," << fxyz[3*i+1] << "," << fxyz[3*i+2];
+        file << std::endl;
+    }
+
+    file.close();
 }
 
 int SimData::getParticleCount() const {

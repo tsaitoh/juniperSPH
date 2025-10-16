@@ -25,11 +25,10 @@ target_link_libraries(KernelTest PRIVATE gtest_main) # Link the test module to t
 target_link_libraries(KernelTest PRIVATE juniperSRC) # Add the kernel code modules to a `kernel_src` library
 add_test(NAME Kernel_Tests COMMAND KernelTest) # Add the test as a new run configuration `KernelTest`
 
-# Create a test for the SimData.cpp module:
-add_executable(ReaderTest test_reading.cpp)
-target_link_libraries(ReaderTest PRIVATE gtest_main gmock_main)
-target_link_libraries(ReaderTest PRIVATE juniperSRC)
-add_test(NAME Reader_Tests COMMAND ReaderTest)
+add_executable(IOTest test_io.cpp)
+target_link_libraries(IOTest PRIVATE gtest_main gmock_main)
+target_link_libraries(IOTest PRIVATE juniperSRC)
+add_test(NAME IO_Tests COMMAND IOTest)
 
 add_executable(NeighbourTest test_neighbours.cpp)
 target_link_libraries(NeighbourTest PRIVATE gtest_main)
